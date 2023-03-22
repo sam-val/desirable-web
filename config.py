@@ -1,0 +1,3 @@
+DEBUG = True
+PORT = 8000
+FLASK_SECRETKEY=b'_5#y2L"F4Q8z\n\xec]'
