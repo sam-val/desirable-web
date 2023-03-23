@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, render_template, request
 
 import config
 import core.core as c
@@ -8,8 +8,12 @@ app = Flask(__name__)
 app.secret_key = config.FLASK_SECRETKEY
 
 @app.route("/")
-def hello_world():
-    return {"message": "hello"}, 404
+def index():
+    title = "Are you desirable?"
+    context = {
+        "title": title,
+    }
+    return render_template("index.html", **context)
 
 @app.get("/question/<int:id>")
 def get_question(id):

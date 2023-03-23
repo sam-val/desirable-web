@@ -101,11 +101,11 @@ def answer_question(id, answer) -> Tuple[str, int, Exception]:
     try:
         message, points = dispatch_dict[id](answer)
     except ValueError:
-        return "Please enter a valid number: ", None, ValueError
+        return "Please enter a valid number", None, ValueError
     except ex.TooOld:
-        return "What are you? A vampire? Enter your real age please: ", None, ex.TooOld
+        return "What are you? A vampire? Enter your real age please", None, ex.TooOld
     except ex.TooMuchMoney:
-        return "Please, Enter the amount you make not the amount you want to make:", None, ex.TooMuchMoney
+        return "Please, Enter the amount you make not the amount you want to make", None, ex.TooMuchMoney
 
     points_dict[id] = points
     if id == len(questions_dic):

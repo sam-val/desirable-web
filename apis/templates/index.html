@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<head>
+  <title>{{ title }}</title>
+  <link rel="stylesheet" href={{ url_for('static', filename='main.css') }} type="text/css"/>
+  <script>
+    window.onload = function() {
+      var start = false
+      var submit = document.getElementById('submit')
+      var text = document.getElementById('text_field')
+      var question = document.getElementById('question')
+      // var err_display = document.getElementById('err_display')
+      var next_question = "/question/1"
+      var play_again = false
+      get_question = function (url) {
+        var xhttp = new XMLHttpRequest()
+        xhttp.onload = function() {
+          var jsonRes = JSON.parse(xhttp.responseText)
+          if (xhttp.readyState == 4 && xhttp.status == 200) {
+            question.innerHTML = jsonRes.message
+          }
+        }
+        xhttp.open("GET", next_question, true)
+        xhttp.send()
+      }
+      calculate = function () {
+        var xhttp = new XMLHttpRequest()
+        xhttp.onload = function() {
+          var jsonRes = JSON.parse(xhttp.responseText)
+          if (xhttp.readyState == 4 && xhttp.status == 200) {
+            message = "Your point is " + jsonRes.point + "\n"
+            message += jsonRes.message 
+            question.innerHTML = message 
+            text.hidden = true
+          } else if (xhttp.status != 200) {
+            if (jsonRes.message != null) {
+              question.innerHTML = jsonRes.message
+            }
+          }
+        }
+        xhttp.open("GET", '/calculate', true)
+        xhttp.send()
+      }
+      reset = function (url) {
+        var xhttp = new XMLHttpRequest()
+        xhttp.open("DELETE", '/reset', true)
+        xhttp.send()
+      }
+      post_question = function(answer) {
+        var xhttp = new XMLHttpRequest()
+        xhttp.onload = function() {
+          console.log(xhttp.responseText)
+          var jsonRes = JSON.parse(xhttp.responseText)
+          if (xhttp.readyState == 4 && xhttp.status == 200) {
+            question.innerHTML = jsonRes.message
+            submit.disabled = true
+            text.disabled = true
+            if (jsonRes.next_question != "") {
+              next_question = jsonRes.next_question
+              setTimeout(function() {
+                get_question(next_question)
+                submit.disabled = false
+                text.disabled = false
+              }, 2000)
+            } else {
+              setTimeout(function() {
+                calculate()
+                submit.value = "Play again?"
+                play_again = true
+                submit.disabled = false
+                text.disabled = false
+              }, 2000)
+            }
+          } else if (xhttp.status != 200) {
+            message = jsonRes.message
+            question.innerHTML = message
+            submit.disabled = false
+          }
+        }
+        xhttp.open("POST", next_question, true)
+        xhttp.setRequestHeader("Content-type", "application/json;charset=UTF-8");
+        data = {
+          "answer": answer
+        }
+        xhttp.send(JSON.stringify(data))
+        submit.disabled = true
+      }
+      start_func = function() {
+        start = true
+        submit.value = "Enter"
+        text.hidden = false;
+        get_question(1)
+      }
+      reset_func = function() {
+        reset()
+        text.hidden = false;
+        question.hidden = false;
+        submit.value = "Enter"
+        get_question(1)
+        next_question = '/question/1'
+        get_question(next_question)
+      }
+
+      submit.onclick = function() {
+        if (start == false) {
+            start_func()
+            return
+        }
+        if (play_again == true) {
+          reset_func()
+          play_again = false
+          return
+        }
+        answer = text.value
+        post_question(answer)
+      }
+    }
+  </script>
+</head>
+
+<body>
+  <h3>{{ title }}</h3>
+  <div id="question">Click button to start game</div>
+  <div class="sam">
+    <input hidden type="text" id="text_field" name="prompt" placeholder="Enter text" required"/>
+    <input type="submit" id="submit" value="Start"/>
+  </div>
+</body>
